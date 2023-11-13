@@ -40,8 +40,8 @@
     term.open(termElem)
     term.loadAddon(fitAddon);
     term.loadAddon(localEcho);
-    fitAddon.fit();
 
+    setTimeout(() => fitAddon.fit(), 100)
     window.addEventListener('resize', () => fitAddon.fit())
 
     const exec = async (cmd: string) => {
