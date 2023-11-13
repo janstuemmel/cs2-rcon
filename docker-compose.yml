@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  rcon:
+    build: .
+    environment:
+      HOST: 127.0.0.1
+      PORT: 27015
+      RCON_PASS: s3cret
+    ports:
+      - "3000:3000"
