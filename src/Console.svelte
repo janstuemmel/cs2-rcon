@@ -45,7 +45,7 @@
     window.addEventListener('resize', () => fitAddon.fit())
 
     const exec = async (cmd: string) => cmd && api.exec(cmd)
-      .then(res => res ? localEcho.println(res) : null)
+      .then(res => res ? localEcho.println('\x1b[0;96m' + res + '\x1b[0;39m') : null)
       .catch(err => localEcho.println(`${err}`));
       
     const read = () => localEcho.read("> ")
