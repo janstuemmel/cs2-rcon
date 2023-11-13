@@ -13,7 +13,7 @@
 
   api.getCvarList()
     .then((cmds) => complete = cmds)
-    .catch(err => console.log(err.message))
+    .catch(console.error)
 
   const completeHandler = (idx: number) => idx === 0 ? complete : []
   
@@ -44,17 +44,15 @@
     setTimeout(() => fitAddon.fit(), 100)
     window.addEventListener('resize', () => fitAddon.fit())
 
-    const exec = async (cmd: string) => {
-      const res = await api.exec(cmd);
-      if (res !== '') localEcho.println(res);
-      read();
-    }
-
+    const exec = async (cmd: string) => cmd && api.exec(cmd)
+      .then(res => res ? localEcho.println(res) : null)
+      .catch(err => localEcho.println(`${err}`));
+      
     const read = () => localEcho.read("> ")
       .then(exec)
-      .catch((err: Error) => localEcho.println(err.message))
+      .finally(read);
 
-    read()
+    read();
   }
 
 </script>

@@ -3,7 +3,12 @@ export const exec = async (cmd: string): Promise<string> => {
   const body = JSON.stringify({ cmd })
   const headers = { 'Content-Type': 'application/json' };
   return fetch(url, { method: 'POST', body, headers })
-    .then(res => res.text())
+    .then(res => {
+      if (res.ok) {
+        return res.text()
+      }
+      throw new Error(res.statusText)
+    })
 }
 
 export const getCvarList = async (): Promise<string[]> => {
