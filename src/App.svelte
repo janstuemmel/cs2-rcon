@@ -8,7 +8,7 @@
   </div>
 
   <div class="p-4">
-    <div class="p-4 rounded-md bg-gray-800">
+    <div class="py-4 rounded-md bg-gray-800">
       <Console />
     </div>
   </div>
