@@ -6,16 +6,21 @@
   export let submit: (cmd: string) => any
 
   let value = ''
-  let active = false
-  let history: string[] = ['status', 'mp_']
-  let data: Cvar[] = []
+  
+  let selectActive = false
+  let inputFocus = false
+  
+  export let historyData: string[] = []
+  
+  let selectData: Cvar[] = []
+  let selectIndex: number | null = null
+  
+  let promptElem: HTMLDivElement
+  let selectElem: HTMLDivElement
   let selectHeight: number
   let selectWidth: number
   let selectLeft: number
   let selectTop: number
-  let promptElem: HTMLDivElement
-  let selectElem: HTMLDivElement
-  let selectIndex: number | null = null
 
   const updateUi = () => {
     selectTop = promptElem.offsetTop - selectHeight;
@@ -28,69 +33,72 @@
 
   afterUpdate(updateUi);
 
+  $: if (value === '') {
+    selectData = []
+    selectActive = false
+  }
+
+  $: if (selectActive) {
+    findCvar(value).then((res) => {
+      selectIndex = null
+      selectData = res
+    })
+  }
+
   const keydown = async (e: KeyboardEvent) => {
+
     if (e.key === 'ArrowUp') {
       e.preventDefault()
       if (selectIndex === null) {
-        selectIndex = data.length - 1
+        selectIndex = selectData.length - 1
       } else if (selectIndex - 1 >= 0) {
         selectIndex -= 1
       }
     }
+    
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       if (selectIndex === null) {
         return
       }
-      if (selectIndex + 1 <= data.length - 1) {
+
+      if (selectIndex + 1 <= selectData.length - 1) {
         selectIndex += 1
+      } else if (selectIndex + 1 > selectData.length - 1) {
+        selectIndex = null
       }
     }
+
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      selectActive = true
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      selectActive = false
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault()
+      
       if (selectIndex !== null) {
-        value = data[selectIndex].name + ' '
+        value = selectData[selectIndex].name + ' '
         selectIndex = null
-        data = []
       } else {
         submit(value)
-        history = [value, ...history]
+        historyData = [value, ...historyData]
         value = ''
       }
+
+      selectActive = false
     }
-  }
-
-  let timer: number;
-
-  $: if (value === '') {
-    data = []
-  }
-
-  const setData = (v: string) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-
-      // TODO: cleanup
-      if (v.length < 2 || v.includes(' ')) {
-        selectIndex = null
-        data = []
-        return;
-      }
-
-      findCvar(v).then((res) => {
-        selectIndex = null
-        data = value === '' ? [] : res.reverse()
-          .sort((a, b) => (a.name.includes(v) ? 1 : 0) - (b.name.includes(v) ? 1 : 0))
-          .sort((a, b) => (a.name.startsWith(v) ? 1 : 0) - (b.name.startsWith(v) ? 1 : 0))
-      })
-
-    }, 100);
   }
 </script>
 
 <svelte:window on:resize={updateUi} />
 
-{#if data.length !== 0 && active}  
+{#if selectData.length !== 0 && selectActive && inputFocus}  
   <div 
     bind:this={selectElem}
     bind:clientHeight={selectHeight}
@@ -99,7 +107,7 @@
     style:max-height={`${300}px`}
     style:width={`${selectWidth}px`}
     class="absolute bg-gray-800 w-full rounded-md overflow-y-scroll shadow-md">
-    {#each data as item, idx}
+    {#each selectData as item, idx}
       <PromptSelectItem 
         scrollTo={(top) => selectElem?.scrollTo({ top, behavior: 'instant' })}
         active={idx === selectIndex} 
@@ -116,9 +124,11 @@
   <input 
     placeholder="type something..."
     bind:value={value}
-    on:focus={() => active = true}
-    on:blur={() => {active = false; selectIndex = null}}
-    on:input={(e) => setData(e.currentTarget.value)}
+    on:focus={() => inputFocus = true}
+    on:blur={() => {
+      inputFocus = false
+      selectActive = false
+    }}
     on:keydown={keydown}
     class="bg-transparent w-full text-sm focus:outline-none font-mono"
     type="text" />
