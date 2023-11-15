@@ -13,7 +13,6 @@
   let results: CommandResult[] = []
 
   const submit = (cmd: string) => {
-    console.log(cmd)
     if (cmd === '') {
       return
     }
