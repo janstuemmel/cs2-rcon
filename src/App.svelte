@@ -1,15 +1,43 @@
 <script lang="ts">
-  import Console from "./Console.svelte";
+  import { afterUpdate } from "svelte";
+  import Prompt from "./Prompt.svelte";
+  import { exec } from "./client";
+
+  type CommandResult = {
+    cmd: string
+    res: string
+  }
+
+  let resultElem: HTMLDivElement;
+  
+  let results: CommandResult[] = [
+    // 'asdsakdlksaj\nsadsadsasdsakdlksaj\nsadsadsasdsakdlksaj\nsadsadsasdsakdlksaj\nsadsadsasdsakdlksaj\nsadsadsasdsakdlksaj\nsadsads'
+  ]
+
+  const submit = (cmd: string) => {
+    console.log(cmd)
+    if (cmd === '') {
+      return
+    }
+    exec(cmd).then(res => {
+      results = [{ res, cmd }, ...results]
+    })
+  }
+  
+  afterUpdate(() => resultElem.scrollTo({ top: 10000 }))
 </script>
 
-<div class="flex-1 flex flex-col h-screen bg-gray-100 dark:bg-gray-700">
-  <div class="flex-1 p-2 text-center tracking-widest text-gray-500 font-mono font-bold">
-    CS<sup class="text-xs">2</sup> RCON
+<div class="flex flex-col flex-1 h-screen bg-gray-100 dark:bg-gray-700 gap-4">
+
+  <div bind:this={resultElem} class="px-4 pt-4 flex-1 flex flex-col-reverse gap-4 overflow-y-scroll">
+    {#each results as result}
+      <div class="text-gray-200 text-xs bg-gray-600 rounded-md">
+        <pre class="overflow-x-scroll p-2"><code>{result.res}</code></pre>
+      </div>
+    {/each}
   </div>
 
-  <div class="p-4">
-    <div class="py-4 rounded-md bg-gray-800">
-      <Console />
-    </div>
+  <div class="px-4 pb-4">
+    <Prompt {submit} />
   </div>
 </div>
