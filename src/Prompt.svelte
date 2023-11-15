@@ -18,16 +18,12 @@
   let promptElem: HTMLDivElement
   let selectElem: HTMLDivElement
   let selectHeight: number
-  let selectWidth: number
-  let selectLeft: number
   let selectTop: number
 
   const updateUi = () => {
     selectTop = promptElem.offsetTop - selectHeight;
-    selectLeft = promptElem.offsetLeft;
-    selectWidth = promptElem.clientWidth;
     if (selectElem && selectIndex === null) {
-      selectElem.scrollTo({ top: 100000 })
+      selectElem.scrollTo({ top: 100000, behavior: 'instant' })
     }
   }
 
@@ -77,6 +73,7 @@
     if (e.key === 'Escape') {
       e.preventDefault()
       selectActive = false
+      selectIndex = null
     }
 
     if (e.key === 'Enter') {
@@ -103,20 +100,21 @@
     bind:this={selectElem}
     bind:clientHeight={selectHeight}
     style:top={`${selectTop - 10}px`}
-    style:left={`${selectLeft}px`}
+    style:left={`${0}px`}
     style:max-height={`${300}px`}
-    style:width={`${selectWidth}px`}
-    class="absolute bg-gray-800 w-full rounded-md overflow-y-scroll shadow-md">
-    {#each selectData as item, idx}
-      <PromptSelectItem 
-        scrollTo={(top) => selectElem?.scrollTo({ top, behavior: 'instant' })}
-        active={idx === selectIndex} 
-        {...item} />
-    {/each}
+    class="absolute w-full overflow-y-scroll bg-white dark:bg-nord-black border-t-4 border-nord-4 dark:border-nord-1">
+    <div class="">
+      {#each selectData as item, idx}
+        <PromptSelectItem 
+          scrollTo={(top) => selectElem?.scrollTo({ top, behavior: 'instant' })}
+          active={idx === selectIndex} 
+          {...item} />
+      {/each}
+    </div>
   </div>
 {/if}
 
-<div class="flex bg-gray-800 rounded-md items-center text-white p-3 gap-2" bind:this={promptElem}>
+<div class="flex bg-nord-5 dark:bg-nord-1 rounded-md items-center text-black dark:text-nord-6 p-3 gap-2" bind:this={promptElem}>
   <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-terminal" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
     <path d="M5 7l5 5l-5 5" />
     <path d="M12 19l7 0" />
@@ -130,6 +128,6 @@
       selectActive = false
     }}
     on:keydown={keydown}
-    class="bg-transparent w-full text-sm focus:outline-none font-mono"
+    class="bg-transparent w-full text-sm focus:outline-none font-mono tracking-wider"
     type="text" />
 </div>
